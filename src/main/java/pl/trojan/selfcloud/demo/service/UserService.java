@@ -1,23 +1,24 @@
 package pl.trojan.selfcloud.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.trojan.selfcloud.demo.event.OnRegistrationCompleteEvent;
-import pl.trojan.selfcloud.demo.exception.UserAlreadyExistException;
-import pl.trojan.selfcloud.demo.exception.UserNotFound;
-import pl.trojan.selfcloud.demo.exception.UsernameIsTakenException;
+import pl.trojan.selfcloud.demo.exception.http.conflict.UserAlreadyExistException;
+import pl.trojan.selfcloud.demo.exception.http.notfound.UserNotFoundException;
+import pl.trojan.selfcloud.demo.exception.http.conflict.UsernameIsTakenException;
 import pl.trojan.selfcloud.demo.model.Role;
 import pl.trojan.selfcloud.demo.model.User;
-import pl.trojan.selfcloud.demo.model.UserDto;
+import pl.trojan.selfcloud.demo.model.dto.UserDto;
+import pl.trojan.selfcloud.demo.model.privileges.RoleName;
 import pl.trojan.selfcloud.demo.repository.RoleRepository;
 import pl.trojan.selfcloud.demo.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService{
@@ -36,7 +37,11 @@ public class UserService{
     }
 
     public User getUser(final long id){
-        return userRepository.findById(id).orElseThrow(UserNotFound::new);
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()){
+            throw new UserNotFoundException("User with id " + id + " not found");
+        }
+        return user.get();
     }
 
     public List<User> getAllUsers(){
@@ -52,14 +57,14 @@ public class UserService{
         if (usernameExists(userDto.getUsername())){
             throw new UsernameIsTakenException("The username is taken.");
         }
-        Role role = roleRepository.findByName("ROLE_USER");
+        Optional<Role> role = roleRepository.findByName(RoleName.USER);
         User user = new User(null,
                 userDto.getUsername(),
                 passwordEncoder.encode(userDto.getPassword()),
                 userDto.getMail(),
                 userDto.isEnabled(),
                 new HashSet<>(),
-                new HashSet<>(List.of(role)));
+                new HashSet<>(List.of(role.get())));
 
         eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
 
@@ -71,26 +76,26 @@ public class UserService{
     }
 
     public User grandModeratorPrivilege(final long id){
-        return editRole(id, "ROLE_MODERATOR");
+        return editRole(id, RoleName.MODERATOR);
     }
     
     public void revokeModeratorPrivilege(final long id){
-        editRole(id, "ROLE_USER");
+        editRole(id, RoleName.USER);
     }
 
-    private User editRole(final long id, final String roleName) {
-        User user = userRepository.findById(id).orElseThrow(UserNotFound::new);
-        Role role = roleRepository.findByName(roleName);
-        user.setRoles(new HashSet<>(List.of(role)));
+    private User editRole(final long id, final RoleName roleName) {
+        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        Optional<Role> role = roleRepository.findByName(roleName);
+        user.setRoles(new HashSet<>(List.of(role.get())));
         userRepository.save(user);
         return user;
     }
 
     private boolean emailExists(final String email){
-        return userRepository.findByMail(email) != null;
+        return userRepository.findByMail(email).isPresent();
     }
 
     private boolean usernameExists(final String username){
-        return userRepository.findByUsername(username) != null;
+        return userRepository.findByUsername(username).isPresent();
     }
 }

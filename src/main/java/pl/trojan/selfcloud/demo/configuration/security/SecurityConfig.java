@@ -1,5 +1,6 @@
 package pl.trojan.selfcloud.demo.configuration.security;
 
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.web.SecurityFilterChain;
+import pl.trojan.selfcloud.demo.model.privileges.RoleName;
 
 @Configuration
 @EnableWebSecurity
@@ -31,6 +33,10 @@ public class SecurityConfig  {
     private final static String[] developerAccess = {
             "/h2-console/**"
     };
+    
+    private final static String USER = RoleName.USER.toString();
+    private final static String MODERATOR = RoleName.MODERATOR.toString();
+    private final static String ADMIN = RoleName.ADMIN.toString();
 
     @Autowired
     private final PasswordEncoder encoder;
@@ -48,17 +54,18 @@ public class SecurityConfig  {
 
 
         http.authorizeHttpRequests(authz -> authz
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(staticResources).permitAll()
                         .requestMatchers(developerAccess).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/register").permitAll()
+                        .requestMatchers( HttpMethod.POST, "/register/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/home/user/**").hasRole("USER")
-                        .requestMatchers("/home/moderator/**").hasRole("MODERATOR")
-                        .requestMatchers("/home/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/orders/**").hasRole("USER")
-                        .requestMatchers(HttpMethod.POST, "/orders/**").hasRole("MODERATOR")
-                        .requestMatchers(HttpMethod.PUT, "/orders/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/orders/**").hasRole("ADMIN")
+                        .requestMatchers("/home/user/**").hasRole(USER)
+                        .requestMatchers("/home/moderator/**").hasRole(MODERATOR)
+                        .requestMatchers("/home/admin/**").hasRole(ADMIN)
+                        .requestMatchers(HttpMethod.GET, "/orders/**").hasRole(USER)
+                        .requestMatchers(HttpMethod.POST, "/orders/**").hasRole(MODERATOR)
+                        .requestMatchers(HttpMethod.PUT, "/orders/**").hasRole(ADMIN)
+                        .requestMatchers(HttpMethod.DELETE, "/orders/**").hasRole(ADMIN)
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login

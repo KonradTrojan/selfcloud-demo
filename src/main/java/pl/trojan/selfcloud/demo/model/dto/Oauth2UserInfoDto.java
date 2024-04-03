@@ -1,4 +1,4 @@
-package pl.trojan.selfcloud.demo.model;
+package pl.trojan.selfcloud.demo.model.dto;
 
 import lombok.Builder;
 import lombok.Getter;

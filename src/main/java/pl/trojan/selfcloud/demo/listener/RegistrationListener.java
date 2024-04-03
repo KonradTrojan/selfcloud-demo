@@ -17,10 +17,8 @@ import java.util.UUID;
 public class RegistrationListener implements
         ApplicationListener<OnRegistrationCompleteEvent> {
 
-
     @Autowired
     private MessageSource messages;
-
     @Autowired
     private JavaMailSender mailSender;
 

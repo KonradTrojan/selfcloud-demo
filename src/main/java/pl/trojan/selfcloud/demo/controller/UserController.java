@@ -5,10 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
-import pl.trojan.selfcloud.demo.exception.OrderNotFound;
-import pl.trojan.selfcloud.demo.exception.UserNotFound;
+import pl.trojan.selfcloud.demo.exception.http.notfound.CustomNotFoundException;
+import pl.trojan.selfcloud.demo.exception.http.notfound.OrderNotFoundException;
 import pl.trojan.selfcloud.demo.model.User;
-import pl.trojan.selfcloud.demo.model.UserDto;
+import pl.trojan.selfcloud.demo.model.dto.UserDto;
 import pl.trojan.selfcloud.demo.service.UserService;
 
 import java.util.List;
@@ -49,18 +49,20 @@ public class UserController {
     public User grandModeratorPrivilege(@PathVariable final long id){
         return userService.grandModeratorPrivilege(id);
     }
+
     @DeleteMapping("/{id}/mod")
     public void revokeModeratorPrivilege(@PathVariable final long id){
         userService.revokeModeratorPrivilege(id);
     }
 
-    @ExceptionHandler(UserNotFound.class)
+    @ExceptionHandler(CustomNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<String> handleUserNotFound(
-            OrderNotFound exception
+            OrderNotFoundException exception
     ) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(exception.getMessage());
     }
+
 }

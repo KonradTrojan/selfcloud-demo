@@ -1,10 +1,7 @@
 package pl.trojan.selfcloud.demo.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -13,6 +10,7 @@ import java.io.Serializable;
 @Table(name = "ORDERS")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Order implements Serializable {
 
     @Id

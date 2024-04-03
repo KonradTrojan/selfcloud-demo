@@ -8,6 +8,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import pl.trojan.selfcloud.demo.model.*;
+import pl.trojan.selfcloud.demo.model.privileges.AuthorityName;
+import pl.trojan.selfcloud.demo.model.privileges.RoleName;
 import pl.trojan.selfcloud.demo.repository.AuthorityRepository;
 import pl.trojan.selfcloud.demo.repository.OrderRepository;
 import pl.trojan.selfcloud.demo.repository.RoleRepository;
@@ -15,6 +17,7 @@ import pl.trojan.selfcloud.demo.repository.UserRepository;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 @Profile("!prod")
 @Component
@@ -37,33 +40,33 @@ public class SetupDataLoader implements
     @Transactional
     public void onApplicationEvent(ContextRefreshedEvent event) {
 
-        List<Privilege> privileges = List.of(Privilege.values());
+        List<AuthorityName> authoritiesNames = List.of(AuthorityName.values());
 
         if (alreadySetup)
             return;
         List<Authority> userAuthorities = List.of(
-                createAuthorityIfNotFound(Privilege.READ_ORDER.toString())
+                createAuthorityIfNotFound(AuthorityName.READ_ORDER)
         );
         List<Authority> modAuthorities = List.of(
-                createAuthorityIfNotFound(Privilege.READ_ORDER.toString()),
-                createAuthorityIfNotFound(Privilege.CREATE_ORDER.toString())
+                createAuthorityIfNotFound(AuthorityName.READ_ORDER),
+                createAuthorityIfNotFound(AuthorityName.CREATE_ORDER)
         );
-        List<Authority> adminAuthorities = privileges.stream()
-                .map(privilege -> createAuthorityIfNotFound(privilege.toString()))
+        List<Authority> adminAuthorities = authoritiesNames.stream()
+                .map(this::createAuthorityIfNotFound)
                 .toList();
 
-        createRoleIfNotFound("ROLE_USER", userAuthorities);
-        createRoleIfNotFound("ROLE_MODERATOR", modAuthorities);
-        createRoleIfNotFound("ROLE_ADMIN", adminAuthorities);
+        createRoleIfNotFound(RoleName.USER, userAuthorities, "Default role for new users.");
+        createRoleIfNotFound(RoleName.MODERATOR, modAuthorities, "Moderator Role");
+        createRoleIfNotFound(RoleName.ADMIN, adminAuthorities, "Admin role");
 
-        Role userRole = roleRepository.findByName("ROLE_USER");
-        Role modRole = roleRepository.findByName("ROLE_MODERATOR");
-        Role adminRole = roleRepository.findByName("ROLE_ADMIN");
+        Optional<Role> userRole = roleRepository.findByName(RoleName.USER);
+        Optional<Role> modRole = roleRepository.findByName(RoleName.MODERATOR);
+        Optional<Role> adminRole = roleRepository.findByName(RoleName.ADMIN);
 
-        User user = new User(null, "user", passwordEncoder.encode("user"), "user@gmail.com", true, new HashSet<>(), List.of(userRole));
-        User test = new User(null, "test", passwordEncoder.encode("test"), "user@gmail.com", true, new HashSet<>(), List.of(userRole));
-        User mod = new User(null, "mod", passwordEncoder.encode("mod"), "mod@gmail.com", true, new HashSet<>(), List.of(modRole));
-        User admin = new User(null, "admin", passwordEncoder.encode("admin"), "admin@gmail.com", true, new HashSet<>(), List.of(adminRole));
+        User user = new User(null, "user", passwordEncoder.encode("user"), "user@gmail.com", true, new HashSet<>(), List.of(userRole.get()));
+        User test = new User(null, "test", passwordEncoder.encode("test"), "user@gmail.com", true, new HashSet<>(), List.of(userRole.get()));
+        User mod = new User(null, "mod", passwordEncoder.encode("mod"), "mod@gmail.com", true, new HashSet<>(), List.of(modRole.get()       ));
+        User admin = new User(null, "admin", passwordEncoder.encode("admin"), "admin@gmail.com", true, new HashSet<>(), List.of(adminRole.get()));
 
         userRepository.save(user);
         userRepository.save(test);
@@ -76,25 +79,26 @@ public class SetupDataLoader implements
     }
 
     @Transactional
-    private Authority createAuthorityIfNotFound(String name) {
+    private Authority createAuthorityIfNotFound(AuthorityName name) {
 
-        Authority authority = authorityRepository.findByName(name);
-        if (authority == null) {
-            authority = new Authority(name);
-            authorityRepository.save(authority);
+        Optional<Authority> authority = authorityRepository.findByName(name);
+        if (authority.isEmpty()) {
+            Authority newAuthority = new Authority(name);
+            return authorityRepository.save(newAuthority);
         }
-        return authority;
+        return authority.get();
     }
 
     @Transactional
     private Role createRoleIfNotFound(
-            String name, List<Authority> authorities) {
+            RoleName name, List<Authority> authorities,
+            String description) {
 
-        Role role = roleRepository.findByName(name);
-        if (role == null) {
-            role = new Role(name, authorities);
-            roleRepository.save(role);
+        Optional<Role> role = roleRepository.findByName(name);
+        if (role.isEmpty()) {
+            Role newRole = new Role(name, authorities, description);
+            return roleRepository.save(newRole);
         }
-        return role;
+        return role.get();
     }
 }

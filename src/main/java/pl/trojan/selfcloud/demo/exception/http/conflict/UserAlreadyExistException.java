@@ -1,14 +1,11 @@
-package pl.trojan.selfcloud.demo.exception;
+package pl.trojan.selfcloud.demo.exception.http.conflict;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.io.Serial;
 
 @ResponseStatus(value = HttpStatus.CONFLICT)
-public class UserAlreadyExistException extends RuntimeException{
-    @Serial
-    private static final long serialVersionUID = 5861310537366287163L;
+public class UserAlreadyExistException extends CustomConflictException{
 
     public UserAlreadyExistException() {
         super();

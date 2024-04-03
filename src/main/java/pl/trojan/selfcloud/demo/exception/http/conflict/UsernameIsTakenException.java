@@ -1,10 +1,10 @@
-package pl.trojan.selfcloud.demo.exception;
+package pl.trojan.selfcloud.demo.exception.http.conflict;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(value = HttpStatus.CONFLICT)
-public class UsernameIsTakenException extends RuntimeException{
+public class UsernameIsTakenException extends CustomConflictException{
 
     public UsernameIsTakenException() {
         super();

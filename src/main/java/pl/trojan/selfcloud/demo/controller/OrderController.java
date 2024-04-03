@@ -5,9 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
-import pl.trojan.selfcloud.demo.exception.OrderNotFound;
+import pl.trojan.selfcloud.demo.exception.http.notfound.CustomNotFoundException;
+import pl.trojan.selfcloud.demo.exception.http.notfound.OrderNotFoundException;
 import pl.trojan.selfcloud.demo.model.Order;
-import pl.trojan.selfcloud.demo.model.Privilege;
+import pl.trojan.selfcloud.demo.model.dto.OrderDto;
 import pl.trojan.selfcloud.demo.service.OrderService;
 
 import java.util.List;
@@ -38,27 +39,25 @@ public class OrderController {
 
     @Secured("CREATE_ORDER")
     @PostMapping
-    public Order createOrder(@RequestBody final Order order){
+    public Order createOrder(@RequestBody final OrderDto order){
         return orderService.createOrder(order);
     }
 
     @Secured("UPDATE_ORDER")
     @PutMapping("/{id}")
-    public Order updateOrder(@PathVariable final long id, @RequestBody final Order order){
-        return orderService.createOrder(order);
+    public Order updateOrder(@PathVariable final long id, @RequestBody final OrderDto order){
+        return orderService.updateOrder(id, order);
     }
 
-//    @Secured("DELETE_ORDER")
+    @Secured("DELETE_ORDER")
     @DeleteMapping("/{id}")
     public void deleteOrder(@PathVariable final long id){
         orderService.deleteOrder(id);
     }
 
-    @ExceptionHandler(OrderNotFound.class)
+    @ExceptionHandler(CustomNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<String> handleOrderNotFound(
-            OrderNotFound exception
-    ) {
+    public ResponseEntity<String> handleOrderNotFound(OrderNotFoundException exception) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(exception.getMessage());

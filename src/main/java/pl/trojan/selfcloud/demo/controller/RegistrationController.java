@@ -2,11 +2,12 @@ package pl.trojan.selfcloud.demo.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import pl.trojan.selfcloud.demo.exception.http.conflict.CustomConflictException;
 import pl.trojan.selfcloud.demo.model.User;
-import pl.trojan.selfcloud.demo.model.UserDto;
+import pl.trojan.selfcloud.demo.model.dto.UserDto;
 import pl.trojan.selfcloud.demo.service.UserService;
 
 @RestController
@@ -22,5 +23,13 @@ public class RegistrationController {
         return userService.registerUser(userDto);
     }
 
-
+    @ExceptionHandler(CustomConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ResponseEntity<String> handleHttpConflict(
+            CustomConflictException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(exception.getMessage());
+    }
 }

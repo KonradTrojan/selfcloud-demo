@@ -2,13 +2,15 @@ package pl.trojan.selfcloud.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import pl.trojan.selfcloud.demo.exception.OrderNotFound;
+import pl.trojan.selfcloud.demo.exception.http.notfound.OrderNotFoundException;
+import pl.trojan.selfcloud.demo.mapper.OrderMapper;
 import pl.trojan.selfcloud.demo.model.Order;
+import pl.trojan.selfcloud.demo.model.dto.OrderDto;
 import pl.trojan.selfcloud.demo.repository.OrderRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderService {
@@ -20,7 +22,11 @@ public class OrderService {
     }
 
     public Order getOrder(final long id){
-        return orderRepository.findById(id).orElseThrow(OrderNotFound::new);
+        Optional<Order> order = orderRepository.findById(id);
+        if (order.isEmpty()) {
+            throw new OrderNotFoundException("Order " + id + " not found.");
+        }
+        return order.get();
     }
 
     public List<Order> getAllOrders(){
@@ -29,12 +35,18 @@ public class OrderService {
         return allOrders;
     }
 
-    public Order createOrder(final Order order){
-        return orderRepository.save(order);
+    public Order createOrder(final OrderDto orderDto){
+        return orderRepository.save(OrderMapper.mapToOrder(orderDto));
     }
 
-    public Order updateOrder(final long id,final Order order){
-        return orderRepository.save(order);
+    public Order updateOrder(final long id, final OrderDto orderDto){
+
+        Optional<Order> order = orderRepository.findById(id);
+        if (order.isPresent()){
+            return orderRepository.save(OrderMapper.mapToOrder(id, orderDto));
+        }else {
+            throw new OrderNotFoundException("Order with id " + id + "not found.");
+        }
     }
 
 

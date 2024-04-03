@@ -11,17 +11,9 @@ import java.util.Locale;
 @Getter
 @Setter
 public class OnRegistrationCompleteEvent extends ApplicationEvent {
-    private String appUrl;
-    private Locale locale;
     private User user;
 
-    public OnRegistrationCompleteEvent(
-            User user) {
+    public OnRegistrationCompleteEvent(final User user) {
         super(user);
-
-        this.user = user;
-
     }
-
-
 }
