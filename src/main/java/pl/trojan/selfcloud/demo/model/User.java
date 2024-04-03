@@ -13,6 +13,8 @@ import java.util.Set;
 @NoArgsConstructor(access= AccessLevel.PRIVATE, force = true)
 @AllArgsConstructor
 @Getter
+@Builder
+@Setter
 @Table(name = "USERS")
 public class User implements Serializable {
 

@@ -1,0 +1,53 @@
+server:
+  port: 8090
+logging:
+  level:
+    org:
+      springframework:
+        security: TRACE
+spring:
+  h2:
+    console:
+      enabled: true
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  mail:
+    host: "smtp.gmail.com"
+    username:
+    password:
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id:
+            client-secret:
+            redirectUri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorizationUri: "https://accounts.google.com/o/oauth2/v2/auth"
+            tokenUri: "https://www.googleapis.com/oauth2/v4/token"
+            userInfoUri: "https://www.googleapis.com/oauth2/v3/userinfo"
+            jwkSetUri: "https://www.googleapis.com/oauth2/v3/certs"
+            clientName: "Google"
+            scope:
+              - email
+              - profile
+              - email
+              - address
+              - phone
+        provider:
+          google:
+            user-name-attribute: email
+springdoc:
+  show-login-endpoint: true

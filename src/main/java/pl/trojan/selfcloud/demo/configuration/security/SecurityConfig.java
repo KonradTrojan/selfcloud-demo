@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,8 +13,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.web.SecurityFilterChain;
-import pl.trojan.selfcloud.demo.model.Privilege;
 
 @Configuration
 @EnableWebSecurity
@@ -34,6 +36,8 @@ public class SecurityConfig  {
     private final PasswordEncoder encoder;
     @Autowired
     private final UserDetailsService userDetailsService;
+    @Autowired
+    private final DefaultOAuth2UserService oAuth2UserService;
 
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(encoder);
@@ -41,6 +45,7 @@ public class SecurityConfig  {
 
     @Bean
     public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
+
 
         http.authorizeHttpRequests(authz -> authz
                         .requestMatchers(staticResources).permitAll()
@@ -59,10 +64,16 @@ public class SecurityConfig  {
                 .formLogin(login -> login
                         .defaultSuccessUrl("/home/hello")
                 )
+                .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("/home/hello")
+                        .userInfoEndpoint(infoEndpoint ->
+                                infoEndpoint.userService(oAuth2UserService))
+                                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login")
-                );
+                )
+        ;
         http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**")
                 .disable());
         http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));

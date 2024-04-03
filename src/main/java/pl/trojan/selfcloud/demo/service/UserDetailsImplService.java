@@ -15,6 +15,7 @@ import pl.trojan.selfcloud.demo.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserDetailsImplService implements UserDetailsService {
@@ -27,10 +28,11 @@ public class UserDetailsImplService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isEmpty()) {
             throw new UsernameNotFoundException("User not found");
         }
+        User user = optionalUser.get();
         return new org.springframework.security.core.userdetails.User(user.getMail(), user.getPassword(), user.isEnabled(), true, true, true, getRolesAndAuthorities(user.getRoles()));
     }
 
