@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.trojan.selfcloud.demo.event.OnRegistrationCompleteEvent;
+import pl.trojan.selfcloud.demo.exception.http.conflict.OperationNotAllowed;
 import pl.trojan.selfcloud.demo.exception.http.conflict.UserAlreadyExistException;
 import pl.trojan.selfcloud.demo.exception.http.notfound.UserNotFoundException;
 import pl.trojan.selfcloud.demo.exception.http.conflict.UsernameIsTakenException;
@@ -100,6 +101,9 @@ public class UserService{
 
     private User editRole(final long id, final RoleName roleName) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        for (Role role : user.getRoles()){
+            if (role.getName() == RoleName.ADMIN) throw new OperationNotAllowed("Operation not allowed.");
+        }
         Optional<Role> role = roleRepository.findByName(roleName);
         user.setRoles(new HashSet<>(List.of(role.get())));
         userRepository.save(user);

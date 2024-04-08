@@ -64,12 +64,10 @@ public class SetupDataLoader implements
         Optional<Role> adminRole = roleRepository.findByName(RoleName.ADMIN);
 
         User user = new User(null, "user", passwordEncoder.encode("user"), "user@gmail.com", true, new HashSet<>(), List.of(userRole.get()));
-        User test = new User(null, "test", passwordEncoder.encode("test"), "user@gmail.com", true, new HashSet<>(), List.of(userRole.get()));
         User mod = new User(null, "mod", passwordEncoder.encode("mod"), "mod@gmail.com", true, new HashSet<>(), List.of(modRole.get()       ));
         User admin = new User(null, "admin", passwordEncoder.encode("admin"), "admin@gmail.com", true, new HashSet<>(), List.of(adminRole.get()));
 
         userRepository.save(user);
-        userRepository.save(test);
         userRepository.save(mod);
         userRepository.save(admin);
 
