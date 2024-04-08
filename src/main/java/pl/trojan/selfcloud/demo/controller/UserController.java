@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import pl.trojan.selfcloud.demo.exception.http.notfound.CustomNotFoundException;
 import pl.trojan.selfcloud.demo.exception.http.notfound.OrderNotFoundException;
 import pl.trojan.selfcloud.demo.model.User;
+import pl.trojan.selfcloud.demo.model.dto.RegistrationUserDto;
 import pl.trojan.selfcloud.demo.model.dto.UserDto;
+import pl.trojan.selfcloud.demo.model.dto.UserWithRolesDto;
 import pl.trojan.selfcloud.demo.service.UserService;
 
 import java.util.List;
@@ -26,17 +28,27 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable final long id){
+    public UserDto getUser(@PathVariable final long id){
         return userService.getUser(id);
     }
 
+    @GetMapping("/{id}/roles")
+    public UserWithRolesDto getUserWithRoles(@PathVariable final long id){
+        return userService.getUserWithRoles(id);
+    }
+
     @GetMapping
-    public List<User> getAllUsers(){
+    public List<UserDto> getAllUsers(){
         return userService.getAllUsers();
     }
 
+    @GetMapping("/roles")
+    public List<UserWithRolesDto> getAllUsersWithRoles(){
+        return userService.getAllUsersWithRoles();
+    }
+
     @PostMapping
-    public User createUser(@RequestBody final UserDto userDto){
+    public UserDto createUser(@RequestBody final RegistrationUserDto userDto){
         return userService.registerUser(userDto);
     }
 
@@ -46,7 +58,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/mod")
-    public User grandModeratorPrivilege(@PathVariable final long id){
+    public UserWithRolesDto grandModeratorPrivilege(@PathVariable final long id){
         return userService.grandModeratorPrivilege(id);
     }
 

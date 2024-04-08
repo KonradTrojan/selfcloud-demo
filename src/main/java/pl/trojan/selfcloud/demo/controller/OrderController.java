@@ -27,25 +27,25 @@ public class OrderController {
 
     @Secured("READ_ORDER")
     @GetMapping("/{id}")
-    public Order getOrder(@PathVariable final long id) {
+    public OrderDto getOrder(@PathVariable final long id) {
         return orderService.getOrder(id);
     }
 
     @Secured("READ_ORDER")
     @GetMapping
-    public List<Order> getOrders(){
+    public List<OrderDto> getOrders(){
         return orderService.getAllOrders();
     }
 
     @Secured("CREATE_ORDER")
     @PostMapping
-    public Order createOrder(@RequestBody final OrderDto order){
+    public OrderDto createOrder(@RequestBody final OrderDto order){
         return orderService.createOrder(order);
     }
 
     @Secured("UPDATE_ORDER")
     @PutMapping("/{id}")
-    public Order updateOrder(@PathVariable final long id, @RequestBody final OrderDto order){
+    public OrderDto updateOrder(@PathVariable final long id, @RequestBody final OrderDto order){
         return orderService.updateOrder(id, order);
     }
 

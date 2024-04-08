@@ -33,7 +33,7 @@ public class RegistrationListener implements
 
     private void confirmRegistration(OnRegistrationCompleteEvent event) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
-        User user = event.getUser();
+        User user = (User) event.getSource();
 
         String htmlContent = "<h1>Hello " + user.getUsername() + "!</h1>" +
                 "<p>It can contain <strong>HTML</strong> content.</p>";

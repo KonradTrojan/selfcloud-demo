@@ -18,8 +18,8 @@ spring:
     show-sql: true
   mail:
     host: "smtp.gmail.com"
-    username:
-    password:
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
     port: 587
     properties:
       mail:
@@ -32,8 +32,8 @@ spring:
       client:
         registration:
           google:
-            client-id:
-            client-secret:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
             redirectUri: "{baseUrl}/login/oauth2/code/{registrationId}"
             authorizationUri: "https://accounts.google.com/o/oauth2/v2/auth"
             tokenUri: "https://www.googleapis.com/oauth2/v4/token"

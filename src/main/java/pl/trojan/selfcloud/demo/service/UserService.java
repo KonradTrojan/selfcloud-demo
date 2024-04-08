@@ -10,7 +10,10 @@ import pl.trojan.selfcloud.demo.exception.http.notfound.UserNotFoundException;
 import pl.trojan.selfcloud.demo.exception.http.conflict.UsernameIsTakenException;
 import pl.trojan.selfcloud.demo.model.Role;
 import pl.trojan.selfcloud.demo.model.User;
+import pl.trojan.selfcloud.demo.model.dto.RegistrationUserDto;
 import pl.trojan.selfcloud.demo.model.dto.UserDto;
+import pl.trojan.selfcloud.demo.model.dto.UserWithRolesDto;
+import pl.trojan.selfcloud.demo.service.mapper.UserMapper;
 import pl.trojan.selfcloud.demo.model.privileges.RoleName;
 import pl.trojan.selfcloud.demo.repository.RoleRepository;
 import pl.trojan.selfcloud.demo.repository.UserRepository;
@@ -36,21 +39,32 @@ public class UserService{
         this.eventPublisher = eventPublisher;
     }
 
-    public User getUser(final long id){
-        Optional<User> user = userRepository.findById(id);
-        if (user.isEmpty()){
-            throw new UserNotFoundException("User with id " + id + " not found");
-        }
-        return user.get();
+    public UserDto getUser(final long id){
+        return UserMapper.mapToUserDto(
+                findAndCheckUserById(id)
+        );
     }
 
-    public List<User> getAllUsers(){
-        List<User> allUsers = new ArrayList<>();
-        userRepository.findAll().forEach(allUsers::add);
+    public UserWithRolesDto getUserWithRoles(final long id){
+
+        return UserMapper.mapToUserWithRolesDto(
+                findAndCheckUserById(id)
+        );
+    }
+
+    public List<UserDto> getAllUsers(){
+        List<UserDto> allUsers = new ArrayList<>();
+        userRepository.findAll().forEach(user -> allUsers.add(UserMapper.mapToUserDto(user)));
         return allUsers;
     }
 
-    public User registerUser(final UserDto userDto){
+    public List<UserWithRolesDto> getAllUsersWithRoles(){
+        List<UserWithRolesDto> allUsers = new ArrayList<>();
+        userRepository.findAll().forEach(user -> allUsers.add(UserMapper.mapToUserWithRolesDto(user)));
+        return allUsers;
+    }
+
+    public UserDto registerUser(final RegistrationUserDto userDto){
         if (emailExists(userDto.getMail())) {
             throw new UserAlreadyExistException("An account associated with this email exists.");
         }
@@ -67,16 +81,17 @@ public class UserService{
                 new HashSet<>(List.of(role.get())));
 
         eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
+        userRepository.save(user);
 
-        return userRepository.save(user);
+        return UserMapper.mapToUserDto(user);
     }
 
     public void deleteUser(final long id){
         userRepository.deleteById(id);
     }
 
-    public User grandModeratorPrivilege(final long id){
-        return editRole(id, RoleName.MODERATOR);
+    public UserWithRolesDto grandModeratorPrivilege(final long id){
+        return UserMapper.mapToUserWithRolesDto(editRole(id, RoleName.MODERATOR));
     }
     
     public void revokeModeratorPrivilege(final long id){
@@ -89,6 +104,14 @@ public class UserService{
         user.setRoles(new HashSet<>(List.of(role.get())));
         userRepository.save(user);
         return user;
+    }
+
+    private User findAndCheckUserById(final long id){
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()){
+            throw new UserNotFoundException("User with id " + id + " not found");
+        }
+        return user.get();
     }
 
     private boolean emailExists(final String email){

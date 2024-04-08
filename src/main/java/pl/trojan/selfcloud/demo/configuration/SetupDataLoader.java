@@ -73,7 +73,7 @@ public class SetupDataLoader implements
         userRepository.save(mod);
         userRepository.save(admin);
 
-        orderRepository.save(new Order(null, "test", "test", 100, false));
+        orderRepository.save(new Order(null, "test", "test", 100, false, admin));
 
         alreadySetup = true;
     }

@@ -48,7 +48,6 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         return new DefaultOAuth2User(GrantedAuthoritiesMapper.mapRolesToGrantedAuthorities(user.getRoles()), oAuth2User.getAttributes(), "email");
     }
 
-    //TODO
     private User registerNewUser(OAuth2UserRequest oAuth2UserRequest, Oauth2UserInfoDto userInfoDto) {
         Optional<Role> role = roleRepository.findByName(RoleName.USER);
 

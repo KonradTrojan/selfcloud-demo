@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.trojan.selfcloud.demo.exception.http.conflict.CustomConflictException;
 import pl.trojan.selfcloud.demo.model.User;
+import pl.trojan.selfcloud.demo.model.dto.RegistrationUserDto;
 import pl.trojan.selfcloud.demo.model.dto.UserDto;
 import pl.trojan.selfcloud.demo.service.UserService;
 
@@ -19,7 +20,7 @@ public class RegistrationController {
     private final UserService userService;
 
     @PostMapping
-    public User processRegistration(final UserDto userDto){
+    public UserDto processRegistration(final RegistrationUserDto userDto){
         return userService.registerUser(userDto);
     }
 

@@ -22,4 +22,7 @@ public class Order implements Serializable {
     private double price;
     private boolean sell;
 
+    @ManyToOne(targetEntity = User.class)
+    private User user;
+
 }
