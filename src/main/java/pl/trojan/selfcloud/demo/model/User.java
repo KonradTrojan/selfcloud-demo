@@ -6,6 +6,9 @@ import lombok.*;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import pl.trojan.selfcloud.demo.service.mapper.GrantedAuthoritiesMapper;
 
 
 @Entity
@@ -16,7 +19,7 @@ import java.util.Set;
 @Builder
 @Setter
 @Table(name = "USERS")
-public class User implements Serializable {
+public class User implements Serializable, UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +30,6 @@ public class User implements Serializable {
     private String password;
 
     private String mail;
-
     private boolean enabled;
 
     @OneToMany(targetEntity = Order.class)
@@ -42,4 +44,28 @@ public class User implements Serializable {
                     name = "role_id", referencedColumnName = "id"))
     private Collection<Role> roles;
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return GrantedAuthoritiesMapper.mapRolesToGrantedAuthorities(roles);
+    }
+
+    @Override
+    public String getUsername(){
+        return this.getMail();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 }

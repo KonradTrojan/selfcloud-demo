@@ -16,7 +16,7 @@ public final class GrantedAuthoritiesMapper {
         for (Role role : roles) {
             grantedAuthorities.add(role.getName());
             for (Authority authority : role.getAuthorities()){
-                grantedAuthorities.add(authority.getName());
+                if (authority != null) grantedAuthorities.add(authority.getName());
             }
         }
 

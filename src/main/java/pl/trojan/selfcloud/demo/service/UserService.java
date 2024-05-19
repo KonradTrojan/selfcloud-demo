@@ -76,9 +76,9 @@ public class UserService{
         User user = new User(null,
                 userDto.getUsername(),
                 passwordEncoder.encode(userDto.getPassword()),
-                userDto.getMail(),
-                userDto.isEnabled(),
-                new HashSet<>(),
+            userDto.getMail(),
+            true,
+            new HashSet<>(),
                 new HashSet<>(List.of(role.get())));
 
         eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
